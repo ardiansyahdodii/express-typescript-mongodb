@@ -21,3 +21,12 @@ ProductRouter.get('/', (req: Request, res: Response, next: NextFunction) => {
             ]
         })
 })
+
+ProductRouter.post('/', (req: Request, res: Response, next: NextFunction) => {
+    res.status(200).json(
+        {
+            status: true,
+            statusCode: 200,
+            data: req.body
+        })
+})
