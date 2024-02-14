@@ -8,6 +8,7 @@ interface ProductInterface {
 
 export const createProductSchema = (payload : ProductInterface) =>{
     const schema = Joi.object({
+        id: Joi.number().id(),
         name: Joi.string().required(),
         price: Joi.number().allow('', null),
     })
