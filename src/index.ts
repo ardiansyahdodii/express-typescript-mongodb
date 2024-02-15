@@ -3,6 +3,8 @@ import cors from 'cors'
 import bodyParser from 'body-parser';
 import { routes } from './routes';
 
+import './utils/connectDB'
+
 const app: Application = express()
 const port: number = 9000
 
