@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { createProductSchema } from "../validations/product.validation"
-import { addProductToDB, getProductFromDB, getProductFromDBById } from '../services/product.service';
+import { createProductSchema, updateProductSchema } from "../validations/product.validation"
+import { addProductToDB, getProductFromDB, getProductById, updateProductById } from '../services/product.service';
 import { v4 as uuidv4 } from 'uuid';
 
 // const products = [
@@ -54,7 +54,7 @@ export const getProduct = async (req: Request, res: Response) => {
     const { id } = req.params
 
     if (id) {
-        const product : any = await getProductFromDBById(id)
+        const product : any = await getProductById(id)
         if (product) {
             return res.status(200).send(
                 {
@@ -82,4 +82,37 @@ export const getProduct = async (req: Request, res: Response) => {
             })
     }
 
+}
+
+export const updateProduct = async (req: Request, res: Response) => {
+    const { id } = req.params
+    const { error, value } = updateProductSchema(req.body)
+
+    if (error) {
+        return res.status(422).json(
+            {
+                status: false,
+                statusCode: 422,
+                message: error
+            })
+    }
+    try {
+        // console.log(value)
+        await updateProductById(id, value)
+        return res.status(200).json(
+            {
+                status: true,
+                statusCode: 200,
+                message: 'Product updated'
+            }
+        )
+    } catch (error) {
+        return res.status(500).json(
+            {
+                status: false,
+                statusCode: 500,
+                message: error
+            }
+        )
+    }
 }
