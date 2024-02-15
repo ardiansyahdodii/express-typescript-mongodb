@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import { createProductSchema, updateProductSchema } from "../validations/product.validation"
-import { addProductToDB, getProductFromDB, getProductById, updateProductById } from '../services/product.service';
+import { addProductToDB, getProductFromDB, getProductById, updateProductById, deleteProductById } from '../services/product.service';
 import { v4 as uuidv4 } from 'uuid';
+import { resourceLimits } from 'worker_threads';
 
 // const products = [
 //     {
@@ -54,7 +55,7 @@ export const getProduct = async (req: Request, res: Response) => {
     const { id } = req.params
 
     if (id) {
-        const product : any = await getProductById(id)
+        const product: any = await getProductById(id)
         if (product) {
             return res.status(200).send(
                 {
@@ -98,14 +99,61 @@ export const updateProduct = async (req: Request, res: Response) => {
     }
     try {
         // console.log(value)
-        await updateProductById(id, value)
-        return res.status(200).json(
+        const result = await updateProductById(id, value)
+        if (result) {
+            return res.status(200).json(
+                {
+                    status: true,
+                    statusCode: 200,
+                    message: 'Product updated'
+                }
+            )
+        }
+        else {
+            return res.status(404).json(
+                {
+                    status: false,
+                    statusCode: 404,
+                    message: 'Product not found'
+                }
+            )
+        }
+
+    } catch (error) {
+        return res.status(500).json(
             {
-                status: true,
-                statusCode: 200,
-                message: 'Product updated'
+                status: false,
+                statusCode: 500,
+                message: error
             }
         )
+    }
+}
+
+export const deleteProduct = async (req: Request, res: Response) => {
+    const { id } = req.params
+
+    try {
+        const result = await deleteProductById(id)
+        if (result) {
+            return res.status(200).json(
+                {
+                    status: true,
+                    statusCode: 200,
+                    message: 'Product deleted'
+                }
+            )
+        }
+        else {
+            return res.status(404).json(
+                {
+                    status: false,
+                    statusCode: 404,
+                    message: 'Product not found'
+                }
+            )
+        }
+
     } catch (error) {
         return res.status(500).json(
             {
