@@ -1,13 +1,7 @@
 import { Request, Response } from 'express';
 import { createProductSchema } from "../validations/product.validation"
-import { getProductFromDB } from '../services/product.service';
-
-interface ProductType {
-    product_id: String
-    name: String
-    price: Number
-    variant: String
-}
+import { addProductToDB, getProductFromDB, getProductFromDBById } from '../services/product.service';
+import { v4 as uuidv4 } from 'uuid';
 
 // const products = [
 //     {
@@ -27,7 +21,8 @@ interface ProductType {
 //     }
 // ]
 
-export const createProduct = (req: Request, res: Response) => {
+export const createProduct = async (req: Request, res: Response) => {
+    req.body.product_id = uuidv4()
     const { error, value } = createProductSchema(req.body)
     if (error) {
         return res.status(422).json(
@@ -37,46 +32,54 @@ export const createProduct = (req: Request, res: Response) => {
                 message: error
             })
     }
-    // products.push(value)
-    return res.status(200).json(
-        {
-            status: true,
-            statusCode: 200,
-            data: value
-        })
+    try {
+        await addProductToDB(value)
+        return res.status(201).json(
+            {
+                status: true,
+                statusCode: 201,
+                message: 'Product created'
+            })
+    } catch (error) {
+        return res.status(500).json(
+            {
+                status: false,
+                statusCode: 500,
+                message: error
+            })
+    }
 }
 
 export const getProduct = async (req: Request, res: Response) => {
-    const products: any = await getProductFromDB()
-    const { name } = req.params
+    const { id } = req.params
 
-    if (name) {
-        const filterProduct = products.filter((product : ProductType) => {
-            if (product.name === name) {
-                return product
-            }
-        })
-        if (filterProduct.length === 0) {
-            return res.status(404).json(
+    if (id) {
+        const product : any = await getProductFromDBById(id)
+        if (product) {
+            return res.status(200).send(
                 {
-                    status: false,
+                    status: true,
+                    statusCode: 200,
+                    data: product
+                })
+        }
+        else {
+            return res.status(404).send(
+                {
+                    status: true,
                     statusCode: 404,
                     message: 'Product not found'
                 })
         }
-        return res.status(200).json(
+    }
+    else {
+        const products: any = await getProductFromDB()
+        return res.status(200).send(
             {
                 status: true,
                 statusCode: 200,
-                data: filterProduct[0]
-            }
-        )
+                data: products
+            })
     }
-    return res.status(200).send(
-        {
-            status: true,
-            statusCode: 200,
-            data: products
-        })
-    
+
 }
