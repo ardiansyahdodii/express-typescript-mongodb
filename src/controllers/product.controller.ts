@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import { createProductSchema, updateProductSchema } from "../validations/product.validation"
 import { addProductToDB, getProductFromDB, getProductById, updateProductById, deleteProductById } from '../services/product.service';
 import { v4 as uuidv4 } from 'uuid';
-import { resourceLimits } from 'worker_threads';
 
 // const products = [
 //     {
